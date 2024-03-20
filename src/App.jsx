@@ -1,86 +1,72 @@
 import { useEffect, useRef } from "react";
 import Map from "ol/Map.js";
 import View from "ol/View.js";
-import TileLayer from "ol/layer/Tile";
-import StadiaMaps from "ol/source/StadiaMaps";
-import VectorSource from "ol/source/Vector";
-import VectorLayer from "ol/layer/Vector";
-import Feature from "ol/Feature";
-import Point from "ol/geom/Point";
-import Google from "ol/source/Google";
-import Layer from "ol/layer/WebGLTile";
-
-import {
-  DragRotateAndZoom,
-  defaults as defaultInteractions,
-} from "ol/interaction";
-
-import { Icon, Style } from "ol/style.js";
+import OSM from "ol/source/OSM.js";
+import { Draw, Modify, Snap } from "ol/interaction.js";
+import { Vector as VectorSource } from "ol/source.js";
+import { Tile as TileLayer, Vector as VectorLayer } from "ol/layer.js";
 import "./App.css";
-
-function createStyle(src, img) {
-  return new Style({
-    image: new Icon({
-      anchor: [0.5, 0.96],
-      crossOrigin: "anonymous",
-      src: src,
-      img: img,
-      imgSize: img ? [img.width, img.height] : undefined,
-    }),
-  });
-}
 
 function App() {
   const mapRef = useRef();
   const mapInstanceRef = useRef();
-  const vectorSourceRef = useRef();
 
   useEffect(function initMap() {
     if (!mapRef.current) return;
 
-    const markerFeature = new Feature(new Point([200, 0]));
-    markerFeature.set(
-      "style",
-      createStyle(
-        "https://openlayers.org/en/latest/examples/data/icon.png",
-        undefined,
-      ),
-    );
+    const tile = new TileLayer({ source: new OSM() });
 
-    vectorSourceRef.current = new VectorSource({
-      features: [markerFeature],
+    tile.on("prerender", (evt) => {
+      // return
+      if (evt.context) {
+        const context = evt.context;
+        context.filter = "grayscale(80%) invert(100%) ";
+        context.globalCompositeOperation = "source-over";
+      }
     });
 
+    tile.on("postrender", (evt) => {
+      if (evt.context) {
+        const context = evt.context;
+        context.filter = "none";
+      }
+    });
+
+    const source = new VectorSource();
+
+    const vector = new VectorLayer({
+      source: source,
+      style: {
+        "fill-color": "rgba(255, 255, 255, 0.2)",
+        "stroke-color": "#ffcc33",
+        "stroke-width": 2,
+        "circle-radius": 7,
+        "circle-fill-color": "#ffcc33",
+      },
+    });
+
+    function addInteractions() {
+      const draw = new Draw({
+        source: source,
+        type: "Polygon",
+      });
+      map.addInteraction(draw);
+      const snap = new Snap({ source: source });
+      map.addInteraction(snap);
+    }
+
     const map = new Map({
-      target: mapRef.current,
+      layers: [tile, vector],
       view: new View({
         center: [0, 0],
         zoom: 2,
       }),
-      interactions: defaultInteractions().extend([new DragRotateAndZoom()]),
-      layers: [
-        new Layer({
-          source: new Google({
-            key: "AIzaSyDLDS_zPNgRcBZ-z34oVCHrXRJJceboL9o",
-            scale: "scaleFactor2x",
-            highDpi: true,
-          }),
-        }),
-      ],
+      target: mapRef.current,
     });
+
     mapInstanceRef.current = map;
 
-    map.on("click", (e) => {
-      const newMarkerFeature = new Feature(new Point(e.coordinate));
-      newMarkerFeature.set(
-        "style",
-        createStyle(
-          "https://openlayers.org/en/latest/examples/data/icon.png",
-          undefined,
-        ),
-      );
-      vectorSourceRef.current.addFeature(newMarkerFeature);
-    });
+    addInteractions();
 
     return () => {
       map.setTarget(null);
