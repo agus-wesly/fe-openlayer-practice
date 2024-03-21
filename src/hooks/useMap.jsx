@@ -96,7 +96,7 @@ export const useMap = () => {
     });
 
     // ANIMATION POINT
-    source.on("addfeature", function (e) {
+    source.on("addfeature", function(e) {
       const feature = e.feature;
       const start = Date.now();
       const flashGeom = feature.getGeometry().clone();
@@ -161,11 +161,11 @@ export const useMap = () => {
 
       mapInstanceRef.current.addOverlay(measureTooltipRef.current);
 
-      draw.on("drawstart", function (evt) {
+      draw.on("drawstart", function(evt) {
         let sketch = evt.feature;
         let tooltipCoord = evt.coordinate;
 
-        sketch.getGeometry().on("change", function (evt) {
+        sketch.getGeometry().on("change", function(evt) {
           const geom = evt.target;
           if (geom instanceof LineString) {
             let output;
@@ -178,7 +178,7 @@ export const useMap = () => {
         });
       });
 
-      draw.on("drawend", function () {
+      draw.on("drawend", function() {
         measureTooltipElementRef.current.style.display = "none";
       });
 
@@ -199,8 +199,6 @@ export const useMap = () => {
     mapRef,
     measureTooltipElementRef,
     drawFeature,
-    mapInstanceRef,
-    setDrawFeature,
     addInteractions,
     zoomButtonRef,
     removeFeature,
