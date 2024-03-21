@@ -4,7 +4,6 @@ import View from "ol/View.js";
 import { Draw, Snap } from "ol/interaction.js";
 import { Vector as VectorSource, OSM } from "ol/source.js";
 import { Tile as TileLayer, Vector as VectorLayer } from "ol/layer.js";
-import { fromLonLat } from "ol/proj";
 import { Zoom, defaults as defaultControls } from "ol/control";
 import { Circle as CircleStyle, Fill, Stroke, Style } from "ol/style.js";
 import { LineString } from "ol/geom";
@@ -12,6 +11,8 @@ import { Overlay } from "ol";
 import { unByKey } from "ol/Observable";
 import { getVectorContext } from "ol/render";
 import { easeOut } from "ol/easing";
+import { fromLonLat } from "ol/proj";
+
 import { formatLength } from "../utils/map";
 
 const duration = 1000;
@@ -96,13 +97,11 @@ export const useMap = () => {
     });
 
     // ANIMATION POINT
-    source.on("addfeature", function(e) {
+    source.on("addfeature", (e) => {
       const feature = e.feature;
       const start = Date.now();
       const flashGeom = feature.getGeometry().clone();
-      const listenerKey = tile.on("postrender", animate);
-
-      function animate(event) {
+      const listenerKey = tile.on("postrender", (event) => {
         const frameState = event.frameState;
         const elapsed = frameState.time - start;
         if (elapsed >= duration) {
@@ -127,7 +126,7 @@ export const useMap = () => {
         vectorContext.setStyle(style);
         vectorContext.drawGeometry(flashGeom);
         mapInstanceRef.current.render();
-      }
+      });
     });
 
     mapInstanceRef.current = map;
@@ -161,11 +160,11 @@ export const useMap = () => {
 
       mapInstanceRef.current.addOverlay(measureTooltipRef.current);
 
-      draw.on("drawstart", function(evt) {
+      draw.on("drawstart", (evt) => {
         let sketch = evt.feature;
         let tooltipCoord = evt.coordinate;
 
-        sketch.getGeometry().on("change", function(evt) {
+        sketch.getGeometry().on("change", (evt) => {
           const geom = evt.target;
           if (geom instanceof LineString) {
             let output;
@@ -178,7 +177,7 @@ export const useMap = () => {
         });
       });
 
-      draw.on("drawend", function() {
+      draw.on("drawend", () => {
         measureTooltipElementRef.current.style.display = "none";
       });
 

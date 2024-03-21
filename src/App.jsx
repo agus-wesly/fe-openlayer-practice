@@ -1,6 +1,6 @@
 import { useMap } from "./hooks/useMap";
 
-function App() {
+const App = () => {
   const {
     mapRef,
     measureTooltipElementRef,
@@ -61,6 +61,6 @@ function App() {
       </div>
     </>
   );
-}
+};
 
 export default App;
