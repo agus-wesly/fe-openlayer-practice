@@ -4,7 +4,7 @@ import View from "ol/View.js";
 import { Draw, Snap } from "ol/interaction.js";
 import { Vector as VectorSource, OSM } from "ol/source.js";
 import { Tile as TileLayer, Vector as VectorLayer } from "ol/layer.js";
-import { Zoom, defaults as defaultControls } from "ol/control";
+import { defaults as defaultControls } from "ol/control";
 import { Circle as CircleStyle, Fill, Stroke, Style } from "ol/style.js";
 import { LineString } from "ol/geom";
 import { Overlay } from "ol";
@@ -57,7 +57,6 @@ export const useMap = () => {
   const mapRef = useRef();
   const mapInstanceRef = useRef();
   const snapRef = useRef();
-  const zoomButtonRef = useRef();
   const measureTooltipElementRef = useRef();
   const measureTooltipRef = useRef();
 
@@ -88,12 +87,7 @@ export const useMap = () => {
         zoom: 12,
       }),
       target: mapRef.current,
-      controls: defaultControls({ zoom: false }).extend([
-        new Zoom({
-          target: zoomButtonRef.current,
-          className: "button-zoom-container",
-        }),
-      ]),
+      controls: defaultControls({ zoom: false }),
     });
 
     // ANIMATION POINT
@@ -194,12 +188,27 @@ export const useMap = () => {
     setDrawFeature(null);
   }, [drawFeature]);
 
+  const zoomIn = useCallback(() => {
+    mapInstanceRef.current.getView().animate({
+      zoom: mapInstanceRef.current.getView().getZoom() + 1,
+      duration: 225,
+    });
+  }, []);
+
+  const zoomOut = useCallback(() => {
+    mapInstanceRef.current.getView().animate({
+      zoom: mapInstanceRef.current.getView().getZoom() - 1,
+      duration: 225,
+    });
+  }, []);
+
   return {
     mapRef,
     measureTooltipElementRef,
     drawFeature,
     addInteractions,
-    zoomButtonRef,
     removeFeature,
+    zoomIn,
+    zoomOut,
   };
 };

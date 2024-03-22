@@ -6,8 +6,9 @@ const App = () => {
     measureTooltipElementRef,
     drawFeature,
     addInteractions,
-    zoomButtonRef,
     removeFeature,
+    zoomIn,
+    zoomOut,
   } = useMap();
 
   return (
@@ -56,7 +57,23 @@ const App = () => {
             <img src="/locate.svg" className="size-5" />
           </button>
 
-          <div ref={zoomButtonRef} id="btn-container"></div>
+          <button
+            onClick={() => {
+              zoomIn();
+            }}
+            className="p-2 bg-neutral-800 rounded ml-[1px]"
+          >
+            <img src="/zoom-in.svg" className="size-5" />
+          </button>
+
+          <button
+            onClick={() => {
+              zoomOut();
+            }}
+            className="p-2 bg-neutral-800 rounded ml-[1px]"
+          >
+            <img src="/zoom-out.svg" className="size-5" />
+          </button>
         </div>
       </div>
     </>
