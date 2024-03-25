@@ -6,17 +6,20 @@ import { Vector as VectorSource, OSM } from "ol/source.js";
 import { Tile as TileLayer, Vector as VectorLayer } from "ol/layer.js";
 import { defaults as defaultControls } from "ol/control";
 import { Circle as CircleStyle, Fill, Stroke, Style } from "ol/style.js";
-import { LineString } from "ol/geom";
-import { Overlay } from "ol";
+import { LineString, Point } from "ol/geom";
+import { Feature, Overlay } from "ol";
 import { unByKey } from "ol/Observable";
 import { getVectorContext } from "ol/render";
 import { easeOut } from "ol/easing";
 import { fromLonLat } from "ol/proj";
+import Polyline from "ol/format/Polyline";
 
 import { formatLength } from "../utils/map";
 
 const duration = 1000;
 const source = new VectorSource();
+let lastTime = 0;
+let distance = 0;
 
 const vector = new VectorLayer({
   source: source,
@@ -59,6 +62,10 @@ export const useMap = () => {
   const snapRef = useRef();
   const measureTooltipElementRef = useRef();
   const measureTooltipRef = useRef();
+  const routeRef = useRef();
+  const vectorLayerRef = useRef();
+  const positionRef = useRef();
+  const geoMarkerRef = useRef();
 
   useEffect(function initMap() {
     if (!mapRef.current) return;
@@ -171,8 +178,56 @@ export const useMap = () => {
         });
       });
 
-      draw.on("drawend", () => {
-        measureTooltipElementRef.current.style.display = "none";
+      draw.on("drawend", (evt) => {
+        routeRef.current = evt.feature.getGeometry();
+
+        const routeFeature = new Feature({
+          type: "route",
+          geometry: evt.feature.getGeometry(),
+        });
+
+        const startMarker = new Feature({
+          type: "icon",
+          geometry: new Point(routeRef.current.getFirstCoordinate()),
+        });
+
+        const endMarker = new Feature({
+          type: "icon",
+          geometry: new Point(routeRef.current.getLastCoordinate()),
+        });
+
+        positionRef.current = startMarker.getGeometry().clone();
+
+        const geoMarker = new Feature({
+          geometry: positionRef.current,
+        });
+        geoMarkerRef.current = geoMarker;
+
+        const vectorLayer = new VectorLayer({
+          source: new VectorSource({
+            features: [
+              routeFeature,
+              geoMarkerRef.current,
+              startMarker,
+              endMarker,
+            ],
+          }),
+          style: function () {
+            return new Style({
+              image: new CircleStyle({
+                radius: 7,
+                fill: new Fill({ color: "black" }),
+                stroke: new Stroke({
+                  color: "red",
+                  width: 2,
+                }),
+              }),
+            });
+          },
+        });
+
+        vectorLayerRef.current = vectorLayer;
+        mapInstanceRef.current.addLayer(vectorLayer);
       });
 
       const snap = new Snap({ source: source });
@@ -202,6 +257,39 @@ export const useMap = () => {
     });
   }, []);
 
+  const startAnimation = useCallback(() => {
+    lastTime = Date.now();
+
+    vectorLayerRef.current.on("postrender", (event) => {
+      const speed = 2;
+      const time = event.frameState.time;
+      const elapsedTime = time - lastTime;
+      distance = (distance + (speed * elapsedTime) / 1e6) % 2;
+
+      const currentCoordinate = routeRef.current.getCoordinateAt(
+        distance > 1 ? 2 - distance : distance,
+      );
+      positionRef.current.setCoordinates(currentCoordinate);
+      const vectorContext = getVectorContext(event);
+      vectorContext.setStyle(
+        new Style({
+          image: new CircleStyle({
+            radius: 7,
+            fill: new Fill({ color: "black" }),
+            stroke: new Stroke({
+              color: "black",
+              width: 2,
+            }),
+          }),
+        }),
+      );
+      vectorContext.drawGeometry(positionRef.current);
+
+      mapInstanceRef.current.render();
+    });
+    geoMarkerRef.current.setGeometry(null);
+  }, []);
+
   return {
     mapRef,
     measureTooltipElementRef,
@@ -210,5 +298,6 @@ export const useMap = () => {
     removeFeature,
     zoomIn,
     zoomOut,
+    startAnimation,
   };
 };

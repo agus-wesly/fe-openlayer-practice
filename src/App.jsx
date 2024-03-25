@@ -9,6 +9,7 @@ const App = () => {
     removeFeature,
     zoomIn,
     zoomOut,
+    startAnimation,
   } = useMap();
 
   return (
@@ -73,6 +74,13 @@ const App = () => {
             className="p-2 bg-neutral-800 rounded ml-[1px]"
           >
             <img src="/zoom-out.svg" className="size-5" />
+          </button>
+
+          <button
+            onClick={startAnimation}
+            className="p-2 bg-neutral-800 rounded ml-[1px]"
+          >
+            AN
           </button>
         </div>
       </div>
