@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Moveable Element</title>
+    <style>
+      .moveable {
+        width: 100px;
+        height: 100px;
+        background-color: #ccc;
+        position: absolute;
+        cursor: move;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="moveable" id="moveableElement"></div>
+
+    <script>
+      // Get the moveable element
+      const moveableElement = document.getElementById('moveableElement')
+
+      let isDragging = false
+      let offsetX, offsetY
+
+      // Function to handle mouse down event
+      function onMouseDown(event) {
+        isDragging = true
+        offsetX = event.clientX - moveableElement.getBoundingClientRect().left
+        offsetY = event.clientY - moveableElement.getBoundingClientRect().top
+      }
+
+      // Function to handle mouse move event
+      function onMouseMove(event) {
+        if (isDragging) {
+          moveableElement.style.left = event.clientX - offsetX + 'px'
+          moveableElement.style.top = event.clientY - offsetY + 'px'
+        }
+      }
+
+      // Function to handle mouse up event
+      function onMouseUp() {
+        isDragging = false
+      }
+
+      // Event listeners for mouse events
+      moveableElement.addEventListener('mousedown', onMouseDown)
+      document.addEventListener('mousemove', onMouseMove)
+      document.addEventListener('mouseup', onMouseUp)
+    </script>
+  </body>
+</html>
