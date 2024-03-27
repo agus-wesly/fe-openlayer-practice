@@ -12,21 +12,8 @@ import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
 import { TracksTab } from "./components/tracks-tab";
 
-const iconFeature = new Feature(new Point(fromLonLat([106.60981, -6.914744])));
-
-const iconStyle = new Style({
-  image: new Icon({
-    anchorXUnits: "fraction",
-    anchorYUnits: "pixels",
-    src: "https://avatars.githubusercontent.com/u/98297487?v=4",
-    width: 50,
-    height: 50,
-  }),
-});
-iconFeature.setStyle(iconStyle);
-
 const vectorSource = new VectorSource({
-  features: [iconFeature],
+  features: [],
 });
 
 const vectorLayer = new VectorLayer({
@@ -40,10 +27,10 @@ const generateStyle = (selectedMode) => {
       anchorYUnits: "pixels",
       src:
         selectedMode === "allid-allenv"
-          ? "https://avatars.githubusercontent.com/u/98297487?v=4"
-          : "/profile.jpg",
-      width: 50,
-      height: 50,
+          ? "https://www.pngplay.com/wp-content/uploads/5/Dot-Symbol-PNG-Pic-Background.png"
+          : "https://cdn2.iconfinder.com/data/icons/symbol-color-common-2/32/point_yellow-512.png",
+      width: 30,
+      height: 30,
     }),
   });
 };
