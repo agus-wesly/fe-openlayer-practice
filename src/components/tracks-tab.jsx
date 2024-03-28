@@ -37,6 +37,8 @@ const TDA_FILTERS = [
 ];
 
 export function TracksTab({ selectedFeatures, onInputCheckboxChange }) {
+  const isSelectAllPoint = !selectedFeatures.length;
+
   return (
     <div className="bg-neutral-700 p-5 rounded-xl">
       <div className="flex flex-col w-full mb-3 items-start justify-start gap-2 [writing-mode:vertical-lr] rotate-180 text-xs">
@@ -53,11 +55,16 @@ export function TracksTab({ selectedFeatures, onInputCheckboxChange }) {
             <div className="flex gap-2" key={filter.id}>
               <h4>{filter?.name}</h4>
               {generateTDAFilterItem(filter.id).map((filterItem) => {
+                const checked =
+                  filterItem.value === "allid-allenv"
+                    ? isSelectAllPoint
+                    : selectedFeatures.includes(filterItem.value);
+
                 return (
                   <InputCheckbox
                     key={filterItem.value}
                     name={filterItem.value}
-                    checked={selectedFeatures.includes(filterItem.value)}
+                    checked={checked}
                     onChange={onInputCheckboxChange}
                   />
                 );

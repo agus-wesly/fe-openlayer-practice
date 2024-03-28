@@ -4,12 +4,12 @@ import { fromLonLat } from "ol/proj";
 import { OSM } from "ol/source";
 import { useCallback, useEffect, useRef, useState } from "react";
 import Map from "ol/Map.js";
-
 import { defaults as defaultControls } from "ol/control";
 import { Point } from "ol/geom";
 import { Icon, Style } from "ol/style";
 import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
+
 import { TracksTab } from "./components/tracks-tab";
 
 const vectorSource = new VectorSource({
@@ -25,12 +25,9 @@ const generateStyle = (selectedMode) => {
     image: new Icon({
       anchorXUnits: "fraction",
       anchorYUnits: "pixels",
-      src:
-        selectedMode === "allid-allenv"
-          ? "https://www.pngplay.com/wp-content/uploads/5/Dot-Symbol-PNG-Pic-Background.png"
-          : "https://cdn2.iconfinder.com/data/icons/symbol-color-common-2/32/point_yellow-512.png",
-      width: 30,
-      height: 30,
+      src: selectedMode === "friend-air" ? "/friend.svg" : "/unknown.svg",
+      width: selectedMode ? 30 : 0,
+      height: selectedMode ? 30 : 0,
     }),
   });
 };
@@ -39,9 +36,11 @@ export default function FeatureModify() {
   const mapRef = useRef();
   const [mapInstance, setMapInstance] = useState(null);
   const onClickMapRef = useRef(() => {});
-  const [selectedMode, setSelectedMode] = useState("allid-allenv");
+  const [selectedMode, setSelectedMode] = useState("friend-air");
 
   const [selectedFeatures, setSelectedFeatures] = useState([]);
+
+  const isSelectAllPoint = !selectedFeatures.length;
 
   useEffect(function initMap() {
     if (!mapRef.current) return;
@@ -73,7 +72,10 @@ export default function FeatureModify() {
       const iconFeature = new Feature(new Point(evt.coordinate));
       iconFeature.setProperties({ mode: selectedMode });
 
-      const iconStyle = generateStyle(selectedMode);
+      let iconStyle = generateStyle(null);
+      if (isSelectAllPoint || selectedFeatures.includes(selectedMode)) {
+        iconStyle = generateStyle(selectedMode);
+      }
       iconFeature.setStyle(iconStyle);
       vectorLayer.getSource().addFeature(iconFeature);
     };
@@ -81,43 +83,43 @@ export default function FeatureModify() {
     mapInstance.addEventListener("click", onClickMapRef.current);
   }
 
-  const showPoint = useCallback(
-    (selectedMode) => {
-      const originalSource = vectorLayer.getSource();
-      const allFeatures = originalSource.getFeatures();
+  const showPoint = useCallback((selectedMode) => {
+    const isSelectAllPoint = !selectedMode.length;
+    const originalSource = vectorLayer.getSource();
+    const allFeatures = originalSource.getFeatures();
 
-      const filterFeatures = (feature) => {
-        return selectedMode.includes(feature.getProperties().mode);
-      };
+    const filterFeatures = (feature) => {
+      return selectedMode.includes(feature.getProperties().mode);
+    };
 
-      // Loop through all features and set their visibility based on the filter function
-      allFeatures.forEach(function (feature) {
-        if (filterFeatures(feature)) {
-          feature.setStyle(generateStyle(feature.getProperties().mode));
-        } else {
-          feature.setStyle(null);
+    allFeatures.forEach(function (feature) {
+      if (isSelectAllPoint || filterFeatures(feature)) {
+        feature.setStyle(generateStyle(feature.getProperties().mode));
+      } else {
+        feature.setStyle(generateStyle(null));
+      }
+    });
+  }, []);
+
+  const onInputCheckboxChange = useCallback(
+    (e) => {
+      const { checked, name } = e.target;
+
+      let newFeatures = [];
+
+      if (checked) {
+        if (name !== "allid-allenv") {
+          newFeatures = [...selectedFeatures, name];
         }
-      });
+      } else {
+        newFeatures = selectedFeatures.filter((item) => item !== name);
+      }
+
+      setSelectedFeatures(newFeatures);
+      showPoint(newFeatures);
     },
-
-    [],
+    [selectedFeatures, showPoint],
   );
-
-  const onInputCheckboxChange = (e) => {
-    if (e.target.checked) {
-      setSelectedFeatures((prev) => {
-        const newFeatures = [...prev, e.target.name];
-        showPoint(newFeatures);
-        return newFeatures;
-      });
-    } else {
-      setSelectedFeatures((prev) => {
-        const newFeatures = [...prev.filter((item) => item !== e.target.name)];
-        showPoint(newFeatures);
-        return newFeatures;
-      });
-    }
-  };
 
   return (
     <div className="w-screen h-screen flex justify-end relative" ref={mapRef}>
@@ -130,10 +132,10 @@ export default function FeatureModify() {
         <button
           className="bg-neutral-800 p-3 rounded"
           onClick={() => {
-            setSelectedMode("allid-allenv");
+            setSelectedMode("friend-air");
           }}
         >
-          All Id All Env
+          Friend Air
         </button>
         <button
           className="bg-neutral-800 p-3 rounded"
