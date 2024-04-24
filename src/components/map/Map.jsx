@@ -1,6 +1,6 @@
-import { useMap } from "./hooks/useMap";
+import { useMap } from './hooks/useMap'
 
-const App = () => {
+const Map = () => {
   const {
     mapRef,
     measureTooltipElementRef,
@@ -9,7 +9,7 @@ const App = () => {
     removeFeature,
     zoomIn,
     zoomOut,
-  } = useMap();
+  } = useMap()
 
   return (
     <>
@@ -22,7 +22,7 @@ const App = () => {
           {drawFeature ? (
             <button
               onClick={() => {
-                removeFeature();
+                removeFeature()
               }}
               className="p-2 bg-neutral-800 rounded ml-[1px]"
             >
@@ -32,7 +32,7 @@ const App = () => {
 
           <button
             onClick={() => {
-              addInteractions("LineString");
+              addInteractions('LineString')
             }}
             className="p-2 bg-neutral-800 rounded ml-[1px]"
           >
@@ -41,7 +41,7 @@ const App = () => {
 
           <button
             onClick={() => {
-              addInteractions("Polygon");
+              addInteractions('Polygon')
             }}
             className="p-2 rounded bg-neutral-800 ml-[1px]"
           >
@@ -50,7 +50,7 @@ const App = () => {
 
           <button
             onClick={() => {
-              addInteractions("Point");
+              addInteractions('Point')
             }}
             className="p-2 bg-neutral-800 rounded ml-[1px]"
           >
@@ -59,7 +59,7 @@ const App = () => {
 
           <button
             onClick={() => {
-              zoomIn();
+              zoomIn()
             }}
             className="p-2 bg-neutral-800 rounded ml-[1px]"
           >
@@ -68,7 +68,7 @@ const App = () => {
 
           <button
             onClick={() => {
-              zoomOut();
+              zoomOut()
             }}
             className="p-2 bg-neutral-800 rounded ml-[1px]"
           >
@@ -77,7 +77,7 @@ const App = () => {
         </div>
       </div>
     </>
-  );
-};
+  )
+}
 
-export default App;
+export default Map
