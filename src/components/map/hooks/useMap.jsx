@@ -131,6 +131,7 @@ export const useMap = () => {
     }
   }, [])
 
+  // Function ini menambah feature drawing sesuai dengan parameter type yang diterima.
   const addInteractions = useCallback(
     (type = 'LineString') => {
       mapInstanceRef.current.removeInteraction(drawFeature)
@@ -155,6 +156,7 @@ export const useMap = () => {
 
       mapInstanceRef.current.addOverlay(measureTooltipRef.current)
 
+      // Hitung jarak & tampilkan tooltip saat melakukan drawing
       draw.on('drawstart', (evt) => {
         let sketch = evt.feature
         let tooltipCoord = evt.coordinate
@@ -184,12 +186,14 @@ export const useMap = () => {
     [drawFeature],
   )
 
+  // Function ini akan melakukan cancel draw yang saat ini sedang aktif
   const removeFeature = useCallback(() => {
     mapInstanceRef.current.removeInteraction(drawFeature)
     mapInstanceRef.current.removeOverlay(measureTooltipRef.current)
     setDrawFeature(null)
   }, [drawFeature])
 
+  // Function ini melakukan zoom in (memperbesar) map
   const zoomIn = useCallback(() => {
     mapInstanceRef.current.getView().animate({
       zoom: mapInstanceRef.current.getView().getZoom() + 1,
@@ -197,6 +201,7 @@ export const useMap = () => {
     })
   }, [])
 
+  // Function ini melakukan zoom out (memperkecil) map
   const zoomOut = useCallback(() => {
     mapInstanceRef.current.getView().animate({
       zoom: mapInstanceRef.current.getView().getZoom() - 1,
