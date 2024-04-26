@@ -14,6 +14,7 @@ import { easeOut } from 'ol/easing'
 import { fromLonLat } from 'ol/proj'
 
 import { formatLength } from '../utils/function/formatter'
+import { getLength } from 'ol/sphere'
 
 const duration = 1000
 const source = new VectorSource()
@@ -162,7 +163,8 @@ export const useMap = () => {
           const geom = evt.target
           if (geom instanceof LineString) {
             let output
-            output = formatLength(geom)
+            const distanceNumber = getLength(geom)
+            output = formatLength(distanceNumber)
             tooltipCoord = geom.getLastCoordinate()
             measureTooltipElementRef.current.style.display = 'block'
             measureTooltipElementRef.current.innerHTML = output
