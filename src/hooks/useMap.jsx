@@ -212,3 +212,5 @@ export const useMap = () => {
     zoomOut,
   };
 };
+
+// geometry: new LineString([coordinate, newCoordinate]),

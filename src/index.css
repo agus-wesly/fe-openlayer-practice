@@ -30,3 +30,16 @@
   background-color: rgb(38 38 38);
   color: white;
 }
+
+.label {
+  background: white;
+  border: 1px solid black;
+  padding: 4px;
+  text: white;
+  user-select: none;
+  pointer-events: none;
+}
+
+.label.selected {
+  border: 3px solid orange;
+}

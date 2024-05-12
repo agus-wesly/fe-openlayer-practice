@@ -1,10 +1,10 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import FeatureModify from "./FeatureModify.jsx";
 import "./index.css";
+import PointTest from "./PointTest";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
-    <FeatureModify />
+    <PointTest />
   </React.StrictMode>,
 );
