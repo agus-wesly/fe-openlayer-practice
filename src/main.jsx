@@ -1,10 +1,11 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";
-import PointTest from "./PointTest";
+import ThreeDim from "./ThreeDim";
+import Move from "./Move";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
-    <PointTest />
+    <Move />
   </React.StrictMode>,
 );
