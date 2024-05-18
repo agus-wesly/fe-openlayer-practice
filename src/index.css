@@ -43,3 +43,7 @@
 .label.selected {
   border: 3px solid orange;
 }
+
+.ol-overlay-container {
+  pointer-events: none !important;
+}

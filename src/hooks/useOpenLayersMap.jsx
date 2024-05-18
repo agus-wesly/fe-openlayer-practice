@@ -24,66 +24,37 @@ function getNewPixel(prevPixel, index) {
 }
 
 function beginDeclutterMode(intersectedElement, map) {
-  // Context menu
-  const length = intersectedElement.length;
-  if (length < 2) return;
+  function isIntersectingWithOtherOverlay(currentOverlay) {
+    const currentExtent = getLabelExtent(currentOverlay, map);
+    return intersectedElement.some((otherOverlay) => {
+      if (currentOverlay === otherOverlay) return false;
 
-  const intersected = new Set();
-
-  for (let i = 0; i < length; ++i) {
-    for (let j = 0; j < length; ++j) {
-      if (i === j) continue;
-      const firstExtent = getLabelExtent(intersectedElement[i], map);
-      const secondExtent = getLabelExtent(intersectedElement[j], map);
-
-      if (intersects(firstExtent, secondExtent)) {
-        intersected.add(intersectedElement[i]);
-        intersected.add(intersectedElement[j]);
-      }
-    }
+      const otherExtent = getLabelExtent(otherOverlay, map);
+      return intersects(currentExtent, otherExtent);
+    });
   }
 
-  const TRUE = true;
+  function isIntersectingWithOtherPoint(currentOverlay) {
+    const currentExtent = getLabelExtent(currentOverlay, map);
+    const vectorSource = map.getLayers().getArray()[1].getSource();
+    return Boolean(vectorSource.getFeaturesInExtent(currentExtent).length);
+  }
 
-  // MOVE INTERSECTED
-  const arrayIntersected = Array.from(intersected);
-  console.log({ arrayIntersected });
-  arrayIntersected.forEach((labelOverlay, index) => {
+  intersectedElement.forEach((labelOverlay, index) => {
     const coordinate = labelOverlay.getPosition();
     const pixel = map.getPixelFromCoordinate(coordinate);
     let newPixel = pixel;
 
-    while (TRUE) {
+    while (
+      isIntersectingWithOtherPoint(labelOverlay) ||
+      isIntersectingWithOtherOverlay(labelOverlay)
+    ) {
+      console.log("LOOP", isIntersectingWithOtherOverlay(labelOverlay));
       newPixel = getNewPixel(newPixel, index);
       const newCoordinate = map.getCoordinateFromPixel(newPixel);
       labelOverlay.setPosition(newCoordinate);
-
-      let overlapDetected = false;
-      for (
-        let otherIndex = 0;
-        otherIndex < arrayIntersected.length;
-        ++otherIndex
-      ) {
-        // Skip self-comparison
-        if (index !== otherIndex) {
-          const otherLabelOverlay = arrayIntersected[otherIndex];
-          const otherExtent = getLabelExtent(otherLabelOverlay, map);
-          const newExtent = getLabelExtent(labelOverlay, map);
-          // If overlap is detected, set flag to continue looping
-          if (intersects(newExtent, otherExtent)) {
-            overlapDetected = true;
-            break;
-          }
-        }
-      }
-      if (overlapDetected) {
-        continue;
-      } else {
-        break;
-      }
     }
     const newCoordinate = map.getCoordinateFromPixel(newPixel);
-    // THE GOAT
     setOverlayPosition(labelOverlay, newCoordinate, map);
   });
 }

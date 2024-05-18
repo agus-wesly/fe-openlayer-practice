@@ -1,9 +1,11 @@
 import Feature from "ol/Feature.js";
-import Point from "ol/geom/Point.js";
-import { Fill, Stroke, Style } from "ol/style";
-import CircleStyle from "ol/style/Circle";
+import { Icon, Stroke, Style } from "ol/style";
 import { Overlay, getUid } from "ol";
-import { GeometryCollection, LineString } from "ol/geom";
+import { GeometryCollection, LineString, Point } from "ol/geom";
+import { getSize } from "ol/extent";
+
+const ICON_WIDTH = 36;
+const ICON_HEIGHT = 36;
 
 export function setOverlayPosition(overlay, newCoordinate, map) {
   // GET LINE
@@ -38,18 +40,15 @@ export function getFeatureById(id, map) {
   return feature;
 }
 
-export function getLabelExtent(labelOverlay, map) {
-  const pixel = map.getPixelFromCoordinate(labelOverlay.getPosition());
-  const label = labelOverlay.getElement();
-
-  const width = label.offsetWidth;
-  const height = label.offsetHeight;
+// Helper function to calculate the extent
+function calculateExtent(pixel, width, height, map) {
   const topLeftPixel = [pixel[0] - width / 2, pixel[1] - height / 2];
   const bottomRightPixel = [pixel[0] + width / 2, pixel[1] + height / 2];
 
   // Convert pixel coordinates to map coordinates
   const topLeftCoord = map.getCoordinateFromPixel(topLeftPixel);
   const bottomRightCoord = map.getCoordinateFromPixel(bottomRightPixel);
+
   return [
     topLeftCoord[0],
     bottomRightCoord[1],
@@ -58,13 +57,32 @@ export function getLabelExtent(labelOverlay, map) {
   ];
 }
 
-let id = 0;
+// Function to get label extent
+export function getLabelExtent(labelOverlay, map) {
+  const pixel = map.getPixelFromCoordinate(labelOverlay.getPosition());
+  const label = labelOverlay.getElement();
+  const width = label.offsetWidth;
+  const height = label.offsetHeight;
 
+  return calculateExtent(pixel, width, height, map);
+}
+
+// Function to get icon extent
+export function getIconExtent(feature, map) {
+  const pointGeom = getFeatureGeometry(feature, "point");
+  const pixel = map.getPixelFromCoordinate(pointGeom.getCoordinates());
+  const width = ICON_WIDTH;
+  const height = ICON_HEIGHT;
+
+  return calculateExtent(pixel, width, height, map);
+}
+
+let id = 0;
 export function createPoint(map, coordinate) {
   const lat = coordinate[0];
   const long = coordinate[1];
 
-  const newCoordinate = [coordinate[0] + 90000, coordinate[1]];
+  const newCoordinate = [coordinate[0] + 100000, coordinate[1]];
 
   // POINT
   const pointGeom = new Point([lat, long]);
@@ -78,16 +96,18 @@ export function createPoint(map, coordinate) {
   // Set the feature's id to its uid so we can query later
   pointFeature.setId(getUid(pointFeature));
 
-  pointFeature.setStyle(
+  pointFeature.setStyle([
     new Style({
-      image: new CircleStyle({
-        radius: 10,
-        fill: new Fill({ color: "rgba(255, 0, 0, 0.1)" }),
-        stroke: new Stroke({ color: "red", width: 1 }),
+      image: new Icon({
+        src: "/vite.svg",
+        width: ICON_WIDTH,
+        height: ICON_HEIGHT,
       }),
-      stroke: new Stroke({ color: "blue", width: 3 }),
+      stroke: new Stroke({ color: "blue", width: 1 }),
     }),
-  );
+  ]);
+
+  console.log("featId", pointFeature.getId());
 
   // OVERLAY
   const label = document.createElement("div");
@@ -106,7 +126,13 @@ export function createPoint(map, coordinate) {
     initialPosition: newCoordinate,
     pointFeature: pointFeature.getId(),
   });
+
+  window["checkExtent"] = function(coord) {
+    console.log(getSize(getIconExtent(pointFeature, map)));
+  };
+
   map.addOverlay(labelOverlay);
 
   return pointFeature;
 }
+[-8212372.615080704, 6041816.146222739];

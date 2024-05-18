@@ -6,6 +6,18 @@ import { useOpenLayersMap } from "./hooks/useOpenLayersMap";
 import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
 import { setOverlayPosition } from "./hooks/utils";
+import { Fill, Stroke, Style } from "ol/style";
+
+const lineStyle = new Style({
+  stroke: new Stroke({
+    color: "green",
+    width: 2,
+  }),
+
+  fill: new Fill({
+    color: "rgba(255, 0, 0, 0.5)", // Red fill color with 50% opacity
+  }),
+});
 
 export default function PointTest() {
   const mapDivRef = useRef();
@@ -19,6 +31,9 @@ export default function PointTest() {
         source: new VectorSource({
           features: [],
         }),
+        style: () => {
+          return [];
+        },
       }),
     ],
     target: mapDivRef.current,
@@ -31,8 +46,8 @@ export default function PointTest() {
   function resetDeclutter() {
     if (!mapInstance) return;
     mapInstance.getOverlays().forEach((overlay) => {
-      // Reset overlay position
       const initialPosition = overlay.getProperties().initialPosition;
+      console.log({ initialPosition });
       setOverlayPosition(overlay, initialPosition, mapInstance);
     });
   }
