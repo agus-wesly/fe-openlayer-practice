@@ -5,22 +5,17 @@ import { platformModifierKeyOnly } from "ol/events/condition";
 import { intersects } from "ol/extent";
 import { createPoint, getLabelExtent, setOverlayPosition } from "./utils";
 
-function getNewPixel(prevPixel, index) {
-  const random = Math.random() * (20 - 10) + 10;
-  // Determine the area based on index
-  index = (index % 4) + 1;
-  switch (index) {
-    case 1:
-      return [prevPixel[0] - random, prevPixel[1] - random];
-    case 2:
-      return [prevPixel[0] + random, prevPixel[1] - random];
-    case 3:
-      return [prevPixel[0] - random, prevPixel[1] + random];
-    case 4:
-      return [prevPixel[0] + random, prevPixel[1] + random];
-    default:
-      return [prevPixel[0] + random, prevPixel[1] - random];
-  }
+function generateLinePixel(prevPixel) {
+  return [prevPixel[0] + 20, prevPixel[1] - 20];
+}
+
+function generateCirclePixel(idx, i, n) {
+  const r = 12;
+  const [a, b] = idx;
+  const angle = (2 * Math.PI * i) / n;
+  const x = a + r * Math.cos(angle);
+  const y = b + r * Math.sin(angle);
+  return [x, y];
 }
 
 function beginDeclutterMode(intersectedElement, map) {
@@ -49,8 +44,19 @@ function beginDeclutterMode(intersectedElement, map) {
       isIntersectingWithOtherPoint(labelOverlay) ||
       isIntersectingWithOtherOverlay(labelOverlay)
     ) {
-      console.log("LOOP", isIntersectingWithOtherOverlay(labelOverlay));
-      newPixel = getNewPixel(newPixel, index);
+      if (isIntersectingWithOtherOverlay(labelOverlay)) {
+        newPixel = generateCirclePixel(
+          newPixel,
+          index,
+          intersectedElement.length,
+        );
+      } else if (isIntersectingWithOtherPoint(labelOverlay)) {
+        newPixel = generateLinePixel(
+          newPixel,
+          index,
+          intersectedElement.length,
+        );
+      }
       const newCoordinate = map.getCoordinateFromPixel(newPixel);
       labelOverlay.setPosition(newCoordinate);
     }
