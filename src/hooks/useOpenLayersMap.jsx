@@ -5,10 +5,6 @@ import { platformModifierKeyOnly } from "ol/events/condition";
 import { intersects } from "ol/extent";
 import { createPoint, getLabelExtent, setOverlayPosition } from "./utils";
 
-function generateLinePixel(prevPixel) {
-  return [prevPixel[0] + 20, prevPixel[1] - 20];
-}
-
 function generateCirclePixel(idx, i, n) {
   const r = 12;
   const [a, b] = idx;
@@ -44,19 +40,11 @@ function beginDeclutterMode(intersectedElement, map) {
       isIntersectingWithOtherPoint(labelOverlay) ||
       isIntersectingWithOtherOverlay(labelOverlay)
     ) {
-      if (isIntersectingWithOtherOverlay(labelOverlay)) {
-        newPixel = generateCirclePixel(
-          newPixel,
-          index,
-          intersectedElement.length,
-        );
-      } else if (isIntersectingWithOtherPoint(labelOverlay)) {
-        newPixel = generateLinePixel(
-          newPixel,
-          index,
-          intersectedElement.length,
-        );
-      }
+      newPixel = generateCirclePixel(
+        newPixel,
+        index,
+        intersectedElement.length,
+      );
       const newCoordinate = map.getCoordinateFromPixel(newPixel);
       labelOverlay.setPosition(newCoordinate);
     }
