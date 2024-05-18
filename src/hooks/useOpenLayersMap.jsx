@@ -6,7 +6,7 @@ import { intersects } from "ol/extent";
 import { createPoint, getLabelExtent, setOverlayPosition } from "./utils";
 
 function generateCirclePixel(idx, i, n) {
-  const r = 12;
+  const r = 90;
   const [a, b] = idx;
   const angle = (2 * Math.PI * i) / n;
   const x = a + r * Math.cos(angle);
@@ -30,7 +30,6 @@ function beginDeclutterMode(intersectedElement, map) {
     const vectorSource = map.getLayers().getArray()[1].getSource();
     return Boolean(vectorSource.getFeaturesInExtent(currentExtent).length);
   }
-
   intersectedElement.forEach((labelOverlay, index) => {
     const coordinate = labelOverlay.getPosition();
     const pixel = map.getPixelFromCoordinate(coordinate);
@@ -48,6 +47,7 @@ function beginDeclutterMode(intersectedElement, map) {
       const newCoordinate = map.getCoordinateFromPixel(newPixel);
       labelOverlay.setPosition(newCoordinate);
     }
+
     const newCoordinate = map.getCoordinateFromPixel(newPixel);
     setOverlayPosition(labelOverlay, newCoordinate, map);
   });

@@ -47,7 +47,6 @@ export default function PointTest() {
     if (!mapInstance) return;
     mapInstance.getOverlays().forEach((overlay) => {
       const initialPosition = overlay.getProperties().initialPosition;
-      console.log({ initialPosition });
       setOverlayPosition(overlay, initialPosition, mapInstance);
     });
   }

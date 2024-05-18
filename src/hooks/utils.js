@@ -61,18 +61,8 @@ function calculateExtent(pixel, width, height, map) {
 export function getLabelExtent(labelOverlay, map) {
   const pixel = map.getPixelFromCoordinate(labelOverlay.getPosition());
   const label = labelOverlay.getElement();
-  const width = label.offsetWidth;
-  const height = label.offsetHeight;
-
-  return calculateExtent(pixel, width, height, map);
-}
-
-// Function to get icon extent
-export function getIconExtent(feature, map) {
-  const pointGeom = getFeatureGeometry(feature, "point");
-  const pixel = map.getPixelFromCoordinate(pointGeom.getCoordinates());
-  const width = ICON_WIDTH;
-  const height = ICON_HEIGHT;
+  const width = label.offsetWidth + 30;
+  const height = label.offsetHeight + 30;
 
   return calculateExtent(pixel, width, height, map);
 }
@@ -107,8 +97,6 @@ export function createPoint(map, coordinate) {
     }),
   ]);
 
-  console.log("featId", pointFeature.getId());
-
   // OVERLAY
   const label = document.createElement("div");
   label.classList.add("label");
@@ -126,10 +114,6 @@ export function createPoint(map, coordinate) {
     initialPosition: newCoordinate,
     pointFeature: pointFeature.getId(),
   });
-
-  window["checkExtent"] = function(coord) {
-    console.log(getSize(getIconExtent(pointFeature, map)));
-  };
 
   map.addOverlay(labelOverlay);
 
