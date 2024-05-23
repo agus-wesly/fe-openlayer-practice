@@ -106,7 +106,7 @@ export function createPoint(map, coordinate) {
   const labelOverlay = new Overlay({
     element: label,
     positioning: "center-center",
-    id: id++,
+    id: crypto.randomUUID(),
   });
 
   labelOverlay.setPosition(newCoordinate);
@@ -115,8 +115,11 @@ export function createPoint(map, coordinate) {
     pointFeature: pointFeature.getId(),
   });
 
+  pointFeature.setProperties({
+    labelId: labelOverlay.getId(),
+  });
+
   map.addOverlay(labelOverlay);
 
   return pointFeature;
 }
-[-8212372.615080704, 6041816.146222739];
