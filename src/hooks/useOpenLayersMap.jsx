@@ -1,9 +1,10 @@
 import Map from "ol/Map.js";
 import { useEffect, useState } from "react";
-import { DragBox } from "ol/interaction";
+import { DragBox, Draw } from "ol/interaction";
 import { platformModifierKeyOnly } from "ol/events/condition";
 import { intersects } from "ol/extent";
-import { createPoint, getLabelExtent, setOverlayPosition } from "./utils";
+import { getLabelExtent, setOverlayPosition } from "./utils";
+import { Fill, Stroke, Style } from "ol/style";
 
 function generateCirclePixel(idx, i, n) {
   const r = 12;
@@ -53,6 +54,31 @@ function beginDeclutterMode(intersectedElement, map) {
   });
 }
 
+function addRightClickInteraction(map) {
+  const div = map.getTargetElement();
+  div.addEventListener("contextmenu", function (e) {
+    e.preventDefault();
+    const coordinate = map.getCoordinateFromPixel([e.x, e.y]);
+    if (!coordinate) return;
+    const extent = [
+      coordinate[0], // minX
+      coordinate[1], // minY
+      coordinate[0], // maxX
+      coordinate[1], // maxY
+    ];
+    const vectorSource = map.getLayers().getArray()[1].getSource();
+    const feature = vectorSource.getFeaturesInExtent(extent)[0];
+    if (feature) {
+      const newStyle = new Style({
+        stroke: new Stroke({
+          color: "red",
+        }),
+      });
+      feature.setStyle(newStyle);
+    }
+  });
+}
+
 function addSelectInteraction(map) {
   const dragBox = new DragBox({
     condition: platformModifierKeyOnly,
@@ -87,10 +113,16 @@ export function useOpenLayersMap(mapDivRef, getInitialOptions) {
     map.on("click", (e) => {
       const resolution = map.getView().getResolution();
       const coordinate = e.coordinate;
-      const newPoint = createPoint(map, coordinate, resolution);
-      map.getLayers().getArray()[1].getSource().addFeature(newPoint);
+      console.log("co", coordinate);
+
+      map.forEachFeatureAtPixel(e.pixel, function (f) {
+        console.log({ f });
+      });
+      // const newPoint = createPoint(map, coordinate, resolution);
+      // map.getLayers().getArray()[1].getSource().addFeature(newPoint);
     });
 
+    addRightClickInteraction(map);
     addSelectInteraction(map);
 
     if (!mapInstance) {

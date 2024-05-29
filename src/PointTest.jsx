@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import View from "ol/View.js";
 import { OSM } from "ol/source.js";
 import { Tile as TileLayer } from "ol/layer.js";
@@ -7,6 +7,7 @@ import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
 import { setOverlayPosition } from "./hooks/utils";
 import { Fill, Stroke, Style } from "ol/style";
+import { Draw } from "ol/interaction";
 
 const lineStyle = new Style({
   stroke: new Stroke({
@@ -21,6 +22,7 @@ const lineStyle = new Style({
 
 export default function PointTest() {
   const mapDivRef = useRef();
+  const [isDrawing, setIsDrawing] = React.useState(false);
 
   const { mapInstance } = useOpenLayersMap(mapDivRef, () => ({
     layers: [
@@ -31,9 +33,6 @@ export default function PointTest() {
         source: new VectorSource({
           features: [],
         }),
-        style: () => {
-          return [];
-        },
       }),
     ],
     target: mapDivRef.current,
@@ -52,6 +51,35 @@ export default function PointTest() {
     });
   }
 
+  useEffect(() => {
+    if (!mapInstance) return;
+    const source = mapInstance.getLayers().getArray()[1].getSource();
+    let draw;
+
+    if (isDrawing) {
+      draw = new Draw({
+        source: source,
+        type: "Circle",
+      });
+
+      draw.on("drawend", (evt) => {
+        const f = evt.feature;
+
+        // Create a new style with a blue fill and a default stroke
+        const newStyle = new Style({
+          stroke: new Stroke({
+            color: "blue",
+          }),
+        });
+        f.setStyle(newStyle);
+      });
+      mapInstance.addInteraction(draw);
+    }
+    return () => {
+      mapInstance.removeInteraction(draw);
+    };
+  }, [isDrawing, mapInstance]);
+
   return (
     <>
       <div
@@ -62,6 +90,14 @@ export default function PointTest() {
           height: "100vh",
         }}
       ></div>
+
+      <button
+        onClick={() => setIsDrawing((prev) => !prev)}
+        className="absolute top-5 right-48 z-[5]"
+      >
+        Toggle draw
+      </button>
+
       <button
         onClick={resetDeclutter}
         className="absolute top-5 right-20 z-[5]"
